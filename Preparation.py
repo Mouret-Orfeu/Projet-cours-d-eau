@@ -14,29 +14,38 @@ import plotly.graph_objects as go
 import geopandas as gpd
 from shapely.geometry import Point
 from tqdm import tqdm
+import json
 import os
+import warnings
+import pickle
+
+
+    
 
 
 
 ### Definition des path
 
 
-Analyse_2007_path = 'raw_data/naiades_export/France_entiere/analyses_2007.csv'
-Analyse_2008_path = 'raw_data/naiades_export/France_entiere/analyses_2008.csv'
-Analyse_2009_path = 'raw_data/naiades_export/France_entiere/analyses_2009.csv'
-Analyse_2010_path = 'raw_data/naiades_export/France_entiere/analyses_2010.csv'
-Analyse_2011_path = 'raw_data/naiades_export/France_entiere/analyses_2011.csv'
-Analyse_2012_path = 'raw_data/naiades_export/France_entiere/analyses_2012.csv'
-Analyse_2013_path = 'raw_data/naiades_export/France_entiere/analyses_2013.csv'
-Analyse_2014_path = 'raw_data/naiades_export/France_entiere/analyses_2014.csv'
-Analyse_2015_path = 'raw_data/naiades_export/France_entiere/analyses_2015.csv'
-Analyse_2016_path = 'raw_data/naiades_export/France_entiere/analyses_2016.csv'
-Analyse_2017_path = 'raw_data/naiades_export/France_entiere/analyses_2017.csv'
-Analyse_2018_path = 'raw_data/naiades_export/France_entiere/analyses_2018.csv'
-Analyse_2019_path = 'raw_data/naiades_export/France_entiere/analyses_2019.csv'
-Analyse_2020_path = 'raw_data/naiades_export/France_entiere/analyses_2020.csv'
-Analyse_2021_path = 'raw_data/naiades_export/France_entiere/analyses_2021.csv'
-Analyse_2022_path = 'raw_data/naiades_export/France_entiere/analyses_2022.csv'
+Analyse_2005_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2005.csv'
+Analyse_2006_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2006.csv'
+Analyse_2007_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2007.csv'
+Analyse_2008_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2008.csv'
+Analyse_2009_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2009.csv'
+Analyse_2010_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2010.csv'
+Analyse_2011_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2011.csv'
+Analyse_2012_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2012.csv'
+Analyse_2013_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2013.csv'
+Analyse_2014_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2014.csv'
+Analyse_2015_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2015.csv'
+Analyse_2016_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2016.csv'
+Analyse_2017_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2017.csv'
+Analyse_2018_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2018.csv'
+Analyse_2019_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2019.csv'
+Analyse_2020_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2020.csv'
+Analyse_2021_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2021.csv'
+Analyse_2022_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2022.csv'
+                     
 
 list_path = [Analyse_2007_path, Analyse_2008_path, Analyse_2009_path, Analyse_2010_path, Analyse_2011_path, Analyse_2012_path, Analyse_2013_path, Analyse_2014_path, Analyse_2015_path, Analyse_2016_path, Analyse_2017_path, Analyse_2018_path, Analyse_2019_path, Analyse_2020_path, Analyse_2021_path, Analyse_2022_path]
 
@@ -44,15 +53,50 @@ Stations_path = 'raw_data/naiades_export/France_entiere/Stations/StationMesureEa
 Bio_path = 'raw_data/naiades_export/France_entiere/Biologie(i2M2)/resultat.csv'
 
 
-def Preparation(Hydroecoregion):
+def Preparation(year, Analyse_path):
 
+    print("\033[92m" + year + ": loadind du csv" + "\033[0m")
 
     # Create directory if it doesn't exist
-    saving_directory_path = f"./cleaned_data/{Hydroecoregion}/2022"
+    saving_directory_path = f"./cleaned_data/{year}"
     if not os.path.exists(saving_directory_path):
         os.makedirs(saving_directory_path)
 
-    Analyses_df = pd.read_csv(Analyse_2022_path, sep=';', header=0)
+
+    # J'ai pas assez de RAM pour lire tout le csv d'un coup, je vais le lire par petit bouts
+    # Define the chunk size
+    chunk_size = 10000  # Adjust this based on your memory constraints
+
+    # On ne garde que les lignes avec ces paramètres
+    filter_values = ['Nitrates', 'Phosphore total', 'Ammonium']
+
+    # Initialize an empty list to store the filtered chunks
+    filtered_chunks = []
+
+        # Suppress specific DtypeWarning from pandas
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=pd.errors.DtypeWarning)
+        # Read the CSV in chunks
+        with tqdm(total=2000, desc="Processing CSV") as pbar:
+            for chunk in pd.read_csv(Analyse_path, sep=';', header=0, chunksize=chunk_size):
+                # Filter the chunk and append to the list
+                filtered_chunk = chunk[chunk['LbLongParamètre'].isin(filter_values)]
+                filtered_chunks.append(filtered_chunk)
+
+                pbar.update(1)
+
+    # Concatenate the filtered chunks into a single DataFrame
+    Analyses_df = pd.concat(filtered_chunks)
+
+    if Analyses_df.empty:
+        print("\033[91mERROR: Pas de Mesure du Nitrate ni d'Amonium ni de Phorsphore\033[0m")
+        return 
+    # else:
+    #     num_rows = len(Analyses_df)
+    #     print("\033[93m" + f"Number of rows in Analyses_df: {num_rows}" + "\033[0m")
+
+        
+
     Stations_df = pd.read_csv(Stations_path, sep=',', header=0)
     Bio_df = pd.read_csv(Bio_path, sep=';', header=0)
 
@@ -65,27 +109,17 @@ def Preparation(Hydroecoregion):
     Analyses_df_worked.loc[Analyses_df_worked['MnemoRqAna'] == "Résultat < au seuil de quantification", 'RsAna'] = 0
 
 
-
+    print("\033[92m" + "Traitement des HER: " + "\033[0m")
 
     ### Suppression des stations dont les coordonnées dans Stations.csv ne sont pas dans la bonne projection
-
-
     Stations_mauvaise_proj = Stations_df[Stations_df['ProjStationMesureEauxSurface'] != 26]
     Stations_mauvaise_proj = Stations_mauvaise_proj[['LbStationMesureEauxSurface']]
     Stations_mauvaise_proj = Stations_mauvaise_proj.drop_duplicates()
 
-    is_in = Analyses_df_worked['LbStationMesureEauxSurface'].isin(Stations_mauvaise_proj['LbStationMesureEauxSurface'])
-    if is_in.any():
-        print("There are stations in Analyses_df_worked that are also present in Stations_mauvaise_proj.")
-    else:
-        print("No stations in Analyses_df_worked are present in Stations_mauvaise_proj.")
-
-
-    print("nb station before geographical projection cleaning: ", Analyses_df_worked['LbStationMesureEauxSurface'].nunique())
     Analyses_df_worked = Analyses_df_worked[~Analyses_df_worked['LbStationMesureEauxSurface'].isin(Stations_mauvaise_proj['LbStationMesureEauxSurface'])]
-    print("nb station after geographical projection cleaning: ",Analyses_df_worked['LbStationMesureEauxSurface'].nunique())
 
-
+    # num_rows = len(Analyses_df_worked)
+    # print("\033[93m" + f"Number of rows remaining 1: {num_rows}" + "\033[0m")
 
     ### Traitement des HER (ajout des HER pour chaque station)
     # 
@@ -106,22 +140,15 @@ def Preparation(Hydroecoregion):
     # Lamber-93 EPSG is 2154
     gdf_stations.set_crs(epsg=2154, inplace=True)
 
-    # Now you can work with your GeoDataFrame
-    print(gdf_stations.head())
-
 
     # Load the shapefile
-    gdf_regions = gpd.read_file("/home/orfeu/Documents/cours/3A/Cours_d_eau/Projet-cours-d-eau/Projet-cours-d-eau/data/naiades_export/HER//Hydroecoregion1.shp")
+    gdf_regions = gpd.read_file("/home/orfeu/Documents/cours/3A/Cours_d_eau/Projet-cours-d-eau/Projet-cours-d-eau/raw_data/naiades_export/HER//Hydroecoregion1.shp")
 
     # Reproject to Lambert-93
     gdf_regions = gdf_regions.to_crs(epsg=2154)
 
-    # View the first few records
-    print(gdf_regions.head())
-
     # Plotting the regions (optional, for visualization)
     gdf_regions.plot()
-
 
     # Perform a spatial join
     joined = gpd.sjoin(gdf_stations, gdf_regions, how="inner", op='within')
@@ -130,17 +157,17 @@ def Preparation(Hydroecoregion):
 
     Station_with_HER_df = Station_with_HER_df.drop_duplicates(subset='LbStationMesureEauxSurface')
 
-    print("nb stations : ",len(Station_with_HER_df))
-
 
     ### Ajouter les HER dans le dataset Analyse
 
-
-    # Create a new column "HER" in Analyses_df_worked
+    # Create a new column "HER" in Analyses_df_worked 
     Analyses_df_worked['HER'] = np.nan
 
-    # Iterate over each unique value in "LbStationMesureEauxSurface" in Analyses_df_worked
-    for station in Analyses_df_worked['LbStationMesureEauxSurface'].unique():
+        # Compute the total number of unique stations
+    total_stations = len(Analyses_df_worked['LbStationMesureEauxSurface'].unique())
+
+    # Iterate over each unique value with a progress bar
+    for station in tqdm(Analyses_df_worked['LbStationMesureEauxSurface'].unique(), total=total_stations, desc="Processing Stations"):
         # Check if the station is in Station_with_HER_df
         if station in Station_with_HER_df['LbStationMesureEauxSurface'].values:
             # Get the corresponding "NomHER1" value from Station_with_HER_df
@@ -148,16 +175,12 @@ def Preparation(Hydroecoregion):
             # Update the "HER" column in Analyses_df_worked where the values of "LbStationMesureEauxSurface" match
             Analyses_df_worked.loc[Analyses_df_worked['LbStationMesureEauxSurface'] == station, 'HER'] = her_value
         else:
-            # If the station is not found in Station_with_HER_df, you can choose to leave it as empty string or handle it differently
+            # Handle stations not found in Station_with_HER_df
             pass
 
-    # Sample 20 random rows for checking
-    random_rows = Analyses_df_worked[['HER', 'LbStationMesureEauxSurface']].sample(n=20)
-    print(random_rows)
 
-
-
-
+    
+   
 
     ### On constitue les time series d'indice i2M2 par station (et en passant on enlève toutes les stations pour lesquels on a pas d'i2M2 dans Analyse_df_worked)
     # 
@@ -198,36 +221,29 @@ def Preparation(Hydroecoregion):
         })
     )
 
-    stations_not_in_grouped = Station_with_HER_df[~Station_with_HER_df['LbStationMesureEauxSurface'].isin(i2M2_df.index)]
-    station_list = stations_not_in_grouped['LbStationMesureEauxSurface'].tolist()
-
-    print(len(Station_with_HER_df))
-    print(len(i2M2_df.index))
-    print(len(station_list))
-
-
 
     Analyses_df_worked = Analyses_df_worked[Analyses_df_worked['LbStationMesureEauxSurface'].isin(i2M2_df.index)]
-    print("Number of rows in Analyses_df_worked:", Analyses_df_worked.shape[0])
-    unique_stations = Analyses_df_worked['LbStationMesureEauxSurface'].unique()
-    print(len(unique_stations))
 
-
-
+    # num_rows = len(Analyses_df_worked)
+    # print("\033[93m" + f"Number of rows remaining 2: {num_rows}" + "\033[0m")
 
     ### Traitement des mesures invalides
-
-
     # Suppression des mesures incertaines puis on supprime la colonne
     Analyses_df_worked = Analyses_df_worked[Analyses_df_worked['LbQualAna'] != 'incertaines']
     Analyses_df_worked = Analyses_df_worked.drop(columns=['LbQualAna'])
     Analyses_df_worked = Analyses_df_worked.drop(columns=['CdQualAna'])
+
+    # num_rows = len(Analyses_df_worked)
+    # print("\033[93m" + f"Number of rows remaining 3: {num_rows}" + "\033[0m")
 
 
 
     # Suppression des lignes avec des commentaires (qui indiquent une mesure incorrecte), puis suppression de la colonne commentaire
     Analyses_df_worked = Analyses_df_worked[pd.isna(Analyses_df_worked['CommentairesAna'])]
     Analyses_df_worked = Analyses_df_worked[pd.isna(Analyses_df_worked['ComResultatAna'])]
+
+    # num_rows = len(Analyses_df_worked)
+    # print("\033[93m" + f"Number of rows remaining 4: {num_rows}" + "\033[0m")
 
     Analyses_df_worked = Analyses_df_worked.drop(columns=['CommentairesAna', 'ComResultatAna'])
 
@@ -240,22 +256,13 @@ def Preparation(Hydroecoregion):
 
     Analyses_df_worked = Analyses_df_worked[['LbFractionAnalysee', 'HeurePrel',  'DatePrel', 'LbLongParamètre', 'RsAna', 'LbStationMesureEauxSurface', 'HER']]
 
-
-    duplicates = Analyses_df_worked.duplicated()
-    similar_rows = Analyses_df_worked[duplicates]
-    print(similar_rows)
-
     # Suppression des lignes dupliquées
     Analyses_df_worked = Analyses_df_worked.drop_duplicates()
 
-        
-
+    # num_rows = len(Analyses_df_worked)
+    # print("\033[93m" + f"Number of rows remaining 5: {num_rows}" + "\033[0m")
 
     ### Corrélation entre paramètres (reprise du code du prof)
-
-
-    params = Analyses_df.groupby(["CdParametre",'CdUniteMesure','CdFractionAnalysee'])
-
 
     param_series = Analyses_df['LbLongParamètre']+' - '+Analyses_df['SymUniteMesure']+ ' - ' + Analyses_df['LbFractionAnalysee']
     analyses_light = Analyses_df[['CdStationMesureEauxSurface','CdPrelevement','RsAna']].copy()
@@ -267,33 +274,24 @@ def Preparation(Hydroecoregion):
 
     cols=[]
     for col in an2.columns :
-    if (an2[col].count()>=481):
-        cols.append(col)
+        if (an2[col].count()>=481):
+            cols.append(col)
     an3=an2[cols]
 
     remplissage_an3 = (~an3.isnull()).sum(axis=1)
 
-    an4 = an3[remplissage_an3>1]
-
-    plt_pp.figure(figsize=(16, 14))
-    mask = np.triu(np.ones_like(an4.corr(), dtype=bool))  
-    sns.heatmap(an4.corr(), annot=False, cmap='BrBG', mask=mask)
-    plt_pp.show()  
+    an4 = an3[remplissage_an3>1] 
 
     param_correlation_matrix = an4.corr()
 
 
-    ### On va enlever les colonnes qui sont corrélées à plus de 0.8
-
+    ### On va enlever les colonnes qui sont corrélées à plus de 0.9
 
     # Create a mask to consider only the lower triangle (excluding the diagonal)
     mask = np.tril(np.ones_like(param_correlation_matrix, dtype=bool), k=-1)
 
-    # Find the pairs where correlation is 0.8 or more
-    highly_correlated_pairs = [(param1, param2) for param1 in param_correlation_matrix.columns for param2 in param_correlation_matrix.columns if (param_correlation_matrix.loc[param1, param2] >= 0.8) and mask[param_correlation_matrix.columns.get_loc(param1), param_correlation_matrix.columns.get_loc(param2)]]
-
-    print(highly_correlated_pairs)
-
+    # Find the pairs where correlation is 0.9 or more
+    highly_correlated_pairs = [(param1, param2) for param1 in param_correlation_matrix.columns for param2 in param_correlation_matrix.columns if (param_correlation_matrix.loc[param1, param2] >= 0.9) and mask[param_correlation_matrix.columns.get_loc(param1), param_correlation_matrix.columns.get_loc(param2)]]
 
     # On reformate les paires de corrélation
 
@@ -307,10 +305,6 @@ def Preparation(Hydroecoregion):
         # Create the new format and add to the list
         transformed_pair = ((first_param, first_fraction), (second_param, second_fraction))
         transformed_pairs.append(transformed_pair)
-
-    print(len(transformed_pairs))
-
-
 
     ### On enlève de Analyses_df_worked un élement (fraction, paramètre) de chaque couple de corrélation 
 
@@ -330,13 +324,6 @@ def Preparation(Hydroecoregion):
             # Add the removed element to the set
             removed_elements.add(pair[0])
 
-
-
-
-    print("Number of rows in Analyses_df_worked:", Analyses_df_worked.shape[0])
-
-
-
     ### Traitement des NaN
 
 
@@ -346,85 +333,37 @@ def Preparation(Hydroecoregion):
     #drop lines where there is a nan
     Analyses_df_worked = Analyses_df_worked.dropna()
 
-
-    print("remaining columns", Analyses_df_worked.columns)
-
-
-
-
-    print("Number of rows in Analyses_df_worked:", Analyses_df_worked.shape[0])
-    print("Number of rows in Analyses_df:", Analyses_df.shape[0])
-
-
+    # num_rows = len( Analyses_df_worked )
+    # print("\033[93m" + f"Number of rows remaining 6: {num_rows}" + "\033[0m")
 
     # On enlève les paramètres physico-chimique peut mesuré (c'est à dire les 80% les moins mesurés (arbitraire))
     # Les moins mesurés, c'est à dire ceux qui apparaissent le moins dans Analyses_df_worked
 
-
-    grouped = Analyses_df_worked.groupby('LbLongParamètre').size()
-    percentile_80 = grouped.quantile(0.8)
-
-    # Now get the LbLongParamètre values that meet or exceed this threshold
-    high_count_params = grouped[grouped >= percentile_80].index.tolist()
-
-    # Print the high count LbLongParamètre values
-    print(high_count_params)
-    print(len(high_count_params))
-
-
-    # Filter Analyses_df to keep only rows where LbLongParamètre is in high_count_params
-    filtered_df_top_param = Analyses_df_worked[Analyses_df_worked['LbLongParamètre'].isin(high_count_params)]
-
-    # Print the filtered dataframe
-    # print(filtered_df)
-
-
-    filtered_df = filtered_df_top_param[filtered_df_top_param['LbLongParamètre'] != "Température de l'Eau"]
-    counts = filtered_df.groupby('LbLongParamètre')['RsAna'].count()
-
-    # Now counts contains the count of non-null 'RsAna' values for each 'LbLongParamètre', excluding 'Température de l'Eau'
-    data_points = counts.values
-
-    # Calculate Q1, Q3, and IQR
-    Q1 = np.percentile(data_points, 25)
-    Q3 = np.percentile(data_points, 75)
-    IQR = Q3 - Q1
-
-    # Determine outliers
-    lower_bound = Q1 - 1.5 * IQR
-    upper_bound = Q3 + 1.5 * IQR
-
-    # Count number of outliers
-    outliers = data_points[(data_points < lower_bound) | (data_points > upper_bound)]
-    number_of_outliers = len(outliers)
-
-    # Print the number of outliers
-    print("Number of outliers:", number_of_outliers)
-
-    fig_boxplot_top_param = go.Figure()
-
-    fig_boxplot_top_param.add_trace(go.Box(y=data_points, name='Non-Null Counts'))
-
-    fig_boxplot_top_param.update_layout(
-        title='Boxplot of Non-Null Counts for Each Parameter (Excluding Température de l\'Eau)',
-        yaxis=dict(title='Count of Non-Null Values')
-    )
-
-    fig_boxplot_top_param.show()
-
-
-
-
+    # DEBUG
+    # print("\n Non-NaN count in 'RsAna' before pivoting:", Analyses_df_worked['RsAna'].notna().sum())
+    # print("\n)")
+    
     # On pivote la table pour accéder plus facilement aux paramètres
-    Ana_df_worked_pivoted = filtered_df_top_param.pivot_table(values='RsAna',index=['LbFractionAnalysee', 'HeurePrel',  'DatePrel', 'LbStationMesureEauxSurface', 'HER'],columns='LbLongParamètre')
+    def take_first(series):
+        return series.iloc[0]
 
+    # Pivot the table using the custom aggregation function
+    Ana_df_worked_pivoted = Analyses_df_worked.pivot_table(
+        values='RsAna',
+        index=['LbFractionAnalysee', 'HeurePrel', 'DatePrel', 'LbStationMesureEauxSurface', 'HER'],
+        columns='LbLongParamètre',
+        aggfunc=take_first  # Use the custom function to take the first value
+    )    
+    print("\033[92m" + "Pivoting de la table fait" + "\033[0m")
 
+    # DEBUG
+    # Check the DataFrame after pivoting
+    # print("\n Non-NaN count after pivoting:", Ana_df_worked_pivoted.notna().sum().sum())
+    # print("\n)")
+
+    
 
     ### Ajout de l'index "DateTime", fusion et formatage de DateFrel et HeurePrel
-
-
-    print(Ana_df_worked_pivoted.index.names)
-
 
     # Extract 'HeurePrel' and 'DatePrel' from the multi-index
     heures = Ana_df_worked_pivoted.index.get_level_values('HeurePrel')
@@ -432,6 +371,11 @@ def Preparation(Hydroecoregion):
 
     # Combine and convert to DateTime
     datetimes = pd.to_datetime(dates + ' ' + heures, format='%Y-%m-%d %H:%M:%S')
+
+    # DEBUG
+    # Check DateTime conversion
+    # print("\n DateTime conversion check:", datetimes.notna().all())
+    # print("\n)")
 
     # Get other levels of the multi-index
     other_levels = Ana_df_worked_pivoted.index.droplevel(['HeurePrel', 'DatePrel'])
@@ -443,13 +387,13 @@ def Preparation(Hydroecoregion):
     Ana_df_worked_pivoted.index = new_index
 
 
-    # Check if there is any non-NaN value across the entire DataFrame
-    any_non_nan = Ana_df_worked_pivoted.notna().any().any()
+    # # Check if there is any non-NaN value across the entire DataFrame
+    # any_non_nan = Ana_df_worked_pivoted.notna().any().any()
 
-    if not any_non_nan:
-        # If there are no non-NaN values, print the following message
-        print("ERROR: There are no non-NaN values in the pivoted dataframe")
-
+    # if not any_non_nan:
+    #     # If there are no non-NaN values, print the following message
+    #     print("\033[91mERROR: There are no non-NaN values in the pivoted dataframe\033[0m")
+    #     return
 
 
 
@@ -474,22 +418,11 @@ def Preparation(Hydroecoregion):
     # Replace None with empty lists
     df_param_time_series['Value'] = df_param_time_series['Value'].apply(lambda x: [[],[]])
 
-    # Define the index where you want to add the item
-    # index_to_modify = ("L'EHN À OTTROTT", "Eau brute", "1-(3,4-diClPhyl)-3-M-urée")
-    # Add an item to the list at the specified index
-    # df_param_time_series.at[index_to_modify, 'Value'].append('TEST')
-    # Access and print the content of the cell
-    # print(df_param_time_series.loc[index_to_modify, 'Value'])
-    # df_param_time_series.head(1)
-    # 'your_item' is the item you want to add. Replace it with the actual item you wish to add
-
-
     data_for_df = []
     non_empty_param_time_series = []
 
     datetime = None
     value = None
-
 
     # Sort the DataFrame by the 'DateTime' level of the MultiIndex
     # On va parcourir le dataframe par ordre chronologique, ce qui va se traduire par des times series dans l'ordre chronologique dans le nouveau dataframe
@@ -526,11 +459,9 @@ def Preparation(Hydroecoregion):
 
     index_key_list = [index for index in index_key_list if len(df_param_time_series.loc[index, 'Value'][0]) >= 3]
 
+    print("\033[92m" + "Création des dataframes fait" + "\033[0m")
 
     ### On va regrouper les times series par station
-
-
-    print(index_key_list[0])
 
     dict_station_to_param_time_series = {}
 
@@ -547,8 +478,6 @@ def Preparation(Hydroecoregion):
 
 
     ### On va regrouper les times series (leur index) par HER
-
-
     dict_HER_to_param_time_series = {}
 
     for index in index_key_list:
@@ -563,20 +492,21 @@ def Preparation(Hydroecoregion):
             dict_HER_to_param_time_series[HER] = [index]
 
 
+    # On sauvegarde les dataframes préparés 
 
-    # Find the key-value pair with the highest length of the value list
-    max_length = max(len(value) for value in dict_HER_to_param_time_series.values())
-    print(max_length)
+    # Save the i2M2_df DataFrame using pickle
+    with open(f"./cleaned_data/{year}/i2M2_df.pkl", 'wb') as file:
+        pickle.dump(i2M2_df, file)
 
-        
-
-
-    # Les time series i2M2 sont dans le dictionnaire i2M2_df (la clé est la station)
-
-
-    # Les times series de paramètres physico chimiques sont dans le dataframe df_param_time_series (utiliser le dictionnaire dict_HER_to_param_time_series de liste d'index pour y accéder (les clé du dico sont les HER))
+    # Save the df_param_time_series DataFrame using pickle
+    with open(f"./cleaned_data/{year}/df_param_time_series.pkl", 'wb') as file:
+        pickle.dump(df_param_time_series, file)
 
 
+    
+    
+
+Preparation('2007', Analyse_2007_path)
 
 
 
