@@ -26,7 +26,7 @@ import pickle
 
 ### Definition des path
 
-
+#Analyse
 Analyse_2005_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2005.csv'
 Analyse_2006_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2006.csv'
 Analyse_2007_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2007.csv'
@@ -45,9 +45,51 @@ Analyse_2019_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analy
 Analyse_2020_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2020.csv'
 Analyse_2021_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2021.csv'
 Analyse_2022_path = 'raw_data/naiades_export/France_entiere/Physico_chimie/analyses_2022.csv'
+
+#i2M2
+i2M2_2007_path = "cleaned_data/2007/i2M2_df"
+i2M2_2008_path = "cleaned_data/2008/i2M2_df"
+i2M2_2009_path = "cleaned_data/2009/i2M2_df"
+i2M2_2010_path = "cleaned_data/2010/i2M2_df"
+i2M2_2011_path = "cleaned_data/2011/i2M2_df"
+i2M2_2012_path = "cleaned_data/2012/i2M2_df"
+i2M2_2013_path = "cleaned_data/2013/i2M2_df"
+i2M2_2014_path = "cleaned_data/2014/i2M2_df"
+i2M2_2015_path = "cleaned_data/2015/i2M2_df"
+i2M2_2016_path = "cleaned_data/2016/i2M2_df"
+i2M2_2017_path = "cleaned_data/2017/i2M2_df"
+i2M2_2018_path = "cleaned_data/2018/i2M2_df"
+i2M2_2019_path = "cleaned_data/2019/i2M2_df"
+i2M2_2020_path = "cleaned_data/2020/i2M2_df"
+i2M2_2021_path = "cleaned_data/2021/i2M2_df"
+i2M2_2022_path = "cleaned_data/2022/i2M2_df"
+
+#df_param_time_series
+df_param_time_series_2007_path = "cleaned_data/2007/df_param_time_series.pkl"
+df_param_time_series_2008_path = "cleaned_data/2008/df_param_time_series.pkl"
+df_param_time_series_2009_path = "cleaned_data/2009/df_param_time_series.pkl"
+df_param_time_series_2010_path = "cleaned_data/2010/df_param_time_series.pkl"
+df_param_time_series_2011_path = "cleaned_data/2011/df_param_time_series.pkl"
+df_param_time_series_2012_path = "cleaned_data/2012/df_param_time_series.pkl"
+df_param_time_series_2013_path = "cleaned_data/2013/df_param_time_series.pkl"
+df_param_time_series_2014_path = "cleaned_data/2014/df_param_time_series.pkl"
+df_param_time_series_2015_path = "cleaned_data/2015/df_param_time_series.pkl"
+df_param_time_series_2016_path = "cleaned_data/2016/df_param_time_series.pkl"
+df_param_time_series_2017_path = "cleaned_data/2017/df_param_time_series.pkl"
+df_param_time_series_2018_path = "cleaned_data/2018/df_param_time_series.pkl"
+df_param_time_series_2019_path = "cleaned_data/2019/df_param_time_series.pkl"
+df_param_time_series_2020_path = "cleaned_data/2020/df_param_time_series.pkl"
+df_param_time_series_2021_path = "cleaned_data/2021/df_param_time_series.pkl"
+df_param_time_series_2022_path = "cleaned_data/2022/df_param_time_series.pkl"
+
+
                      
 
-list_path = [Analyse_2007_path, Analyse_2008_path, Analyse_2009_path, Analyse_2010_path, Analyse_2011_path, Analyse_2012_path, Analyse_2013_path, Analyse_2014_path, Analyse_2015_path, Analyse_2016_path, Analyse_2017_path, Analyse_2018_path, Analyse_2019_path, Analyse_2020_path, Analyse_2021_path, Analyse_2022_path]
+list_analyse_path = [Analyse_2007_path, Analyse_2008_path, Analyse_2009_path, Analyse_2010_path, Analyse_2011_path, Analyse_2012_path, Analyse_2013_path, Analyse_2014_path, Analyse_2015_path, Analyse_2016_path, Analyse_2017_path, Analyse_2018_path, Analyse_2019_path, Analyse_2020_path, Analyse_2021_path, Analyse_2022_path]
+list_i2M2_path = [i2M2_2007_path, i2M2_2008_path, i2M2_2009_path, i2M2_2010_path, i2M2_2011_path, i2M2_2012_path, i2M2_2013_path, i2M2_2014_path, i2M2_2015_path, i2M2_2016_path, i2M2_2017_path, i2M2_2018_path, i2M2_2019_path, i2M2_2020_path, i2M2_2021_path, i2M2_2022_path]
+list_df_param_time_series_path = [df_param_time_series_2007_path, df_param_time_series_2008_path, df_param_time_series_2009_path, df_param_time_series_2010_path, df_param_time_series_2011_path, df_param_time_series_2012_path, df_param_time_series_2013_path, df_param_time_series_2014_path, df_param_time_series_2015_path, df_param_time_series_2016_path, df_param_time_series_2017_path, df_param_time_series_2018_path, df_param_time_series_2019_path, df_param_time_series_2020_path, df_param_time_series_2021_path, df_param_time_series_2022_path]
+list_year = ["2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2020", "2021", "2022"]
+
 
 Stations_path = 'raw_data/naiades_export/France_entiere/Stations/StationMesureEauxSurface.csv'
 Bio_path = 'raw_data/naiades_export/France_entiere/Biologie(i2M2)/resultat.csv'
@@ -333,6 +375,9 @@ def Preparation(year, Analyse_path):
     #drop lines where there is a nan
     Analyses_df_worked = Analyses_df_worked.dropna()
 
+    # strip trailing spaces for the station column
+    Analyses_df_worked['LbStationMesureEauxSurface'] = Analyses_df_worked['LbStationMesureEauxSurface'].str.strip() 
+
     # num_rows = len( Analyses_df_worked )
     # print("\033[93m" + f"Number of rows remaining 6: {num_rows}" + "\033[0m")
 
@@ -491,7 +536,6 @@ def Preparation(year, Analyse_path):
             # Otherwise, initialize a new list with the current index
             dict_HER_to_param_time_series[HER] = [index]
 
-
     # On sauvegarde les dataframes préparés 
 
     # Save the i2M2_df DataFrame using pickle
@@ -503,10 +547,114 @@ def Preparation(year, Analyse_path):
         pickle.dump(df_param_time_series, file)
 
 
+# On créer une list d'index utilisable pour le dataframe physico chimique (notamment, on selectionne les time series avec minimum 2 points)
+def create_index_list(df_param):
+
+    index_list = []
+
+    data_for_df = []
+    non_empty_param_time_series = []
+
+    datetime = None
+    value = None
+
+    print("\033[92m" + "Création de liste d'index" + "\033[0m")
+    # Iterate over the rows of the DataFrame
+    for index in tqdm(df_param.index, desc="Processing", unit="index"):
+        value_at_index = df_param.loc[index, 'Value']
+
+        if all(sublist for sublist in value_at_index):
+            if len(value_at_index[0])>=2:
+                index_list.append(index)
     
+    return index_list
+
+
+
+
+
+def fusion_df_years():
+
+    # Create directory if it doesn't exist
+    saving_directory_path = "./cleaned_data/all"
+    if not os.path.exists(saving_directory_path):
+        os.makedirs(saving_directory_path)
+
+
+
+
+    # FUSION DES DATAFRAME i2M2
+    print("\033[92m" + "Création df_i2M2_all" + "\033[0m")
+
+    # Load the DataFrame from the pickle file
+    with open(f"./cleaned_data/2022/i2M2_df.pkl", 'rb') as file:
+        df_i2M2_all = pickle.load(file)
+
+    # Save the DataFrame using pickle
+    with open("./cleaned_data/all/df_i2M2_all.pkl", 'wb') as file:
+        pickle.dump(df_i2M2_all, file)
+
     
+    # FUSION DES DATAFRAME df_param_time_series
+    print("\033[92m" + "Création df_param_all" + "\033[0m")
 
-Preparation('2007', Analyse_2007_path)
+        
+    # Load the DataFrame from the pickle file
+    with open(f"./cleaned_data/2007/df_param_time_series.pkl", 'rb') as file:
+        df_param_all = pickle.load(file)
+
+    all_index_list = create_index_list(df_param_all)
+        
+    
+        
+    for year in tqdm(list_year[1:], desc="Processing Years", unit="year"):
+        # Load the DataFrame from the pickle file
+        with open(f"./cleaned_data/{year}/df_param_time_series.pkl", 'rb') as file:
+            df_param_year = pickle.load(file)
+
+        index_list = create_index_list(df_param_year)
+
+        all_index_list = list(set(all_index_list) | set(index_list))
+
+        print("\033[92m" + "Fusion d'une année supplémentaire\n" + "\033[0m")
+        for index in tqdm(index_list, desc="Processing Indexes", unit="index"):
+            if index not in df_param_all.index:
+                # Create a new row as a DataFrame with the correct structure
+                new_row = pd.DataFrame({'Value': [[[], []]]}, index=pd.MultiIndex.from_tuples([index], names=df_param_all.index.names))
+                # Use pandas.concat to append the new row to df_param_all
+                df_param_all = pd.concat([df_param_all, new_row])
+
+            # Now extend the data
+            time = df_param_year.loc[index, 'Value'][1]
+            param = df_param_year.loc[index, 'Value'][0]
+
+            df_param_all.at[index, 'Value'][0].extend(param)
+            df_param_all.at[index, 'Value'][1].extend(time)
+
+    # Save the DataFrame using pickle
+    with open("./cleaned_data/all/df_param_all.pkl", 'wb') as file:
+        pickle.dump(df_param_all, file)
 
 
+    # Save all_index_list
+    with open("./cleaned_data/all/all_index_list.pkl", 'wb') as file:
+        pickle.dump(all_index_list, file)
+        
+                
+           
+                
+            
+            
 
+            
+            
+        
+
+idx_year = 0
+for path in list_analyse_path:
+    year = list_year[idx_year]
+    Preparation(year, path)
+    idx_year += 1
+
+
+fusion_df_years()
