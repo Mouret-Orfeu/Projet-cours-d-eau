@@ -7,7 +7,7 @@ Ce projet vise à expliquer la santé biologique des cours d'eau des France à p
 ### Set up
 
 #### Environnement
-Le projet a été réalisé sous Linux, ubuntu 22.04, python 3.10.12.
+Le projet a été réalisé sous Linux, ubuntu 22.04, python 3.10.12et tensorflow 2.15.0.
 Il n'y a malheureusement pas de liste des librairies utilisées et de leur version.
 
 #### Données
